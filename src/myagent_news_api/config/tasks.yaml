@@ -8,11 +8,10 @@ fetch_ai_news:
       Query: "latest AI model architecture research {date}"
 
     From that ONE search result pick the top 7 most relevant AI stories.
-    also see blog and new methods 
     DO NOT run multiple searches — ONE search only to save API quota.
 
     For each story extract:
-      - "title"        : clean readable title (max 12 words)
+      - "title"        : clean readable title 
       - "source"       : publication name
       - "publish_date" : YYYY-MM-DD (skip if older than {two_days_ago})
       - "summary"      :  what is new and why it matters and all related key details in 3 plain-English sentences like mini blog post
@@ -30,21 +29,31 @@ fetch_ai_news:
 fetch_related_youtube_videos:
   description: >
     You have 7 AI topics from fetch_ai_news.
+    Before searching, READ and ANALYZE each topic's title and summary carefully
+    to understand the core technology involved.
 
     IMPORTANT — DO THIS IN ONE SINGLE PASS:
     Run exactly 7 YouTube searches total (one per topic) back-to-back without
     stopping to think between searches. Do NOT make extra searches.
-    Do NOT re-search the same topic twice.make sure you find proper videos of topic like Ai gents then analyze topic properly and givw proper video related to Ai agents not just search Ai agents and give any video. Analyze topic properly and give proper video related to topic.
+    Do NOT re-search the same topic twice.
 
     For each topic:
-      1. Search YouTube using the topic title
-      2. Take the first 2 URLs returned
-      3. If the topic is too new and results seem unrelated, instead search
-         the core technology (e.g. "RAG explained", "mixture of experts explained")
+      1. Analyze the topic summary from fetch_ai_news to identify the core technology.
+      2. Search for the BEST and MOST RELEVANT video for that topic — this can be
+         any format: tutorial, explainer, demo, research breakdown, hands-on guide,
+         paper walkthrough, or interview. Pick whatever best helps the reader
+         understand or use the technology.
+      3. PREFER tutorials if a good one exists — but never force it.
+         A great explainer or demo beats a weak tutorial every time.
+      4. If the topic is too new and results seem unrelated, search the core
+         technology instead (e.g. "RAG tutorial", "mixture of experts explained").
+      5. PRIORITY: Always prefer videos that highlight innovation — new ideas,
+         breakthroughs, novel approaches, or cutting-edge techniques.
+      6. Video age does not matter — relevance and quality come first.
 
     For each video fill ALL fields — if title/channel/date are unknown,
     write your best inference from the URL and topic context. Never leave null.
-    you MUST return 2 videos per topic. and old videos are fine as long as they are relevant and high-quality explainers of the core technology.
+
     Fields per video:
       - "title"        : video title (infer from topic if unknown)
       - "url"          : YouTube URL exactly as returned by tool

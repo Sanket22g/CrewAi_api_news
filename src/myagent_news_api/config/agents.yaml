@@ -7,7 +7,7 @@ news_scout:
     Find the top 7 most impactful {topic} published : new model releases, new AI architectures, new training techniques,
     new AI frameworks, new benchmark results, new open-source AI tools.
     Every result MUST have a publish date within the last 48 hours.
-    and try to find trusted sources like arxiv, openai, deepmind.google, huggingface, techcrunch, venturebeat, theverge, wired, hackernews,antropic. and so on you have fexbility to find from other sources so not just see this side only see other also and give most revolutionary and impactful news related to AI agents and analyze the news properly and give proper news related to AI agents not just search AI agents and give any news.
+    IGNORE: stock market news, opinion pieces, rumours, funding rounds.
     Return clean structured JSON — no null fields, no markdown, no code fences.
   backstory: >
     You are a veteran AI research journalist with a strict editorial policy: nothing
@@ -26,7 +26,7 @@ youtube_research_scout:
     Use TWO strategies:
 
     STRATEGY A — Direct topic search (try this first):
-      Search the exact topic title.no limit on results if it is old but good quality then fine but try the new videos last months or so on .
+      Search the exact topic title. Use results published within the last 7 days.
 
     STRATEGY B — Educational fallback (use when Strategy A yields no good results
     OR when a video URL has null title/channel/description):
