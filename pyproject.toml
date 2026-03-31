@@ -1,0 +1,33 @@
+[project]
+name = "myagent_news_api"
+version = "0.1.0"
+description = "MyAgent_news_api using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]==1.11.0",
+    "fastapi>=0.135.2",
+    "google-api-python-client>=2.193.0",
+    "google-genai>=1.69.0",
+    "uvicorn>=0.42.0",
+]
+
+[project.scripts]
+myagent_news_api = "myagent_news_api.main:run"
+run_crew = "myagent_news_api.main:run"
+train = "myagent_news_api.main:train"
+replay = "myagent_news_api.main:replay"
+test = "myagent_news_api.main:test"
+run_with_trigger = "myagent_news_api.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
+
+[tool.uv]
+override-dependencies = [
+    "lancedb==0.30.0"
+]
