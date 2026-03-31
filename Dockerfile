@@ -9,10 +9,13 @@ RUN pip install uv
 COPY pyproject.toml uv.lock* ./
 
 # Install project dependencies
-RUN uv sync --no-dev
+RUN uv sync --no-dev --no-install-project
 
 # Copy the rest of the application code
 COPY . .
+
+# Sync the project itself
+RUN uv sync --no-dev
 
 # Expose the port the app runs on
 EXPOSE 8000
