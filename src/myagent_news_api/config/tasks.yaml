@@ -2,39 +2,44 @@
 
 fetch_ai_news:
   description: >
-    Today is {date}. Only include articles published after {two_days_ago}.
+    Today is {date}. Only include news articles published after {two_days_ago}. If there are fewer than 7 news articles published in the last 48 hours, fall back to the last 7 days to ensure you get exactly 7 news stories.
 
-    Use SerperDevTool to run ONE single search:
-      Query: "latest AI model architecture research {date}"
-
-    From that ONE search result pick the top 7 most relevant AI stories.
-    DO NOT run multiple searches — ONE search only to save API quota.
-
-    For each story extract:
-      - "title"        : clean readable title 
+    Step 1: Use SerperDevTool to run exactly TWO search queries back-to-back to find the best recent news:
+      Query A: "latest AI model releases and breakthroughs"
+      Query B: "cutting-edge AI research papers and architectures"
+    Combine the search results from both queries, and extract the top 7 most relevant and valuable AI news stories. For each story, extract:
+      - "title"        : clean readable title
       - "source"       : publication name
-      - "publish_date" : YYYY-MM-DD (skip if older than {two_days_ago})
-      - "summary"      :  what is new and why it matters and all related key details in 3 plain-English sentences like mini blog post
+      - "publish_date" : YYYY-MM-DD
+      - "summary"      : what is new, why it matters, and all related key details in 3 plain-English sentences
       - "url"          : direct article link
       - "category"     : model_release | research_paper | framework | product_launch | regulation
 
-    Output: raw JSON array of 7 objects. No markdown, no code fences.
+
+    Step 2: Use GithubTrendingTool to fetch today's top trending GitHub repository.
+    Format the repository into the exact same JSON structure as a news story:
+      - "title"        : Repository Name (e.g., "[owner]/[name]")
+      - "source"       : "GitHub"
+      - "publish_date" : "{date}"
+      - "summary"      : A 3-sentence plain-English summary of what the repository does, what language it uses, and why it is trending today.
+      - "url"          : GitHub repository URL
+      - "category"     : "framework"
+
+    Step 3: Combine them into a single raw JSON array of exactly 8 objects (the first 7 are news stories, and the 8th is the GitHub repository). No markdown, no code fences.
 
   expected_output: >
-    Raw JSON array of 7 objects, all fields filled, no nulls.
+    Raw JSON array of exactly 8 objects, all fields filled, no nulls.
     [{"title":"...","source":"...","publish_date":"...","summary":"...","url":"...","category":"..."}]
   agent: news_scout
 
 
 fetch_related_youtube_videos:
   description: >
-    You have 7 AI topics from fetch_ai_news.
-    Before searching, READ and ANALYZE each topic's title and summary carefully
-    to understand the core technology involved.
+    You have exactly 8 topics (7 news stories and 1 GitHub repository) from fetch_ai_news.
+    Before searching, READ and ANALYZE each topic's title and summary carefully to understand the core technology involved.
 
     IMPORTANT — DO THIS IN ONE SINGLE PASS:
-    Run exactly 7 YouTube searches total (one per topic) back-to-back without
-    stopping to think between searches. Do NOT make extra searches.
+    Run exactly 8 YouTube searches total (one per topic) back-to-back without stopping to think between searches. Do NOT make extra searches.
     Do NOT re-search the same topic twice.
 
     For each topic:
@@ -51,8 +56,7 @@ fetch_related_youtube_videos:
          breakthroughs, novel approaches, or cutting-edge techniques.
       6. Video age does not matter — relevance and quality come first.
 
-    For each video fill ALL fields — if title/channel/date are unknown,
-    write your best inference from the URL and topic context. Never leave null.
+    For each video fill ALL fields — if title/channel/date are unknown, write your best inference from the URL and topic context. Never leave null.
 
     Fields per video:
       - "title"        : video title (infer from topic if unknown)
@@ -61,8 +65,7 @@ fetch_related_youtube_videos:
       - "publish_date" : YYYY-MM-DD or "unknown"
       - "description"  : 1 sentence about what the video covers
 
-    Output: raw JSON object. Key = topic title. Value = array of 2 video objects.
-    No markdown, no code fences.
+    Output: raw JSON object. Key = topic title. Value = array of 2 video objects. No markdown, no code fences.
 
   expected_output: >
     Raw JSON object keyed by topic title, 2 videos each, no nulls.
@@ -80,13 +83,13 @@ generate_final_summary:
     Set "generated_at" to exactly: {date}
     Set "date_range" to: "Last 48 hours from {two_days_ago} to {date}"
 
-    For each of the 7 topics build:
+    For each of the 8 topics build:
       - "topic_title"   : clean title
       - "category"      : from news_scout
       - "source"        : publication name
       - "publish_date"  : article date
       - "article_url"   : original link
-      - "plain_summary" :  what is new and why it matters and all related key details in 3 plain-English sentences like mini blog post
+      - "plain_summary" : what is new and why it matters and all related key details in 3 plain-English sentences like mini blog post
       - "key_takeaways" : array of 3 short strings
       - "related_links" : [{"label":"Original Article","url":"..."}]
       - "youtube_videos": 2 video objects from youtube_research_scout
@@ -98,11 +101,11 @@ generate_final_summary:
     {
       "generated_at": "{date}",
       "report_title": "AI Research & Technology Daily Digest",
-      "total_topics": 7,
+      "total_topics": 8,
       "date_range": "Last 48 hours from {two_days_ago} to {date}",
       "topics": [...]
     }
   agent: summary_analyst
   context:
     - fetch_ai_news
-    - fetch_related_youtube_videos
+    - fetch_related_youtube_videos

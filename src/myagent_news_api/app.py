@@ -1,8 +1,13 @@
 from fastapi import FastAPI
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from myagent_news_api.crew import MyagentNewsApi 
 from datetime import datetime, timedelta, timezone
 
 app = FastAPI()
+
 
 @app.get("/")
 async def root():

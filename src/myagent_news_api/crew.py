@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from myagent_news_api.tools.custom_tool import YouTubeSearchTool
+from myagent_news_api.tools.custom_tool import YouTubeSearchTool, GithubTrendingTool
 from crewai_tools import SerperDevTool,ScrapeWebsiteTool
 from myagent_news_api.models import ResearchDigestOutput
 # If you want to run a snippet of code before or after the crew starts,
@@ -26,9 +26,10 @@ class MyagentNewsApi():
         return Agent(
             config=self.agents_config['news_scout'], # type: ignore[index]
             verbose=True,
-            tools=[SerperDevTool(), ScrapeWebsiteTool()],
+            tools=[SerperDevTool(), ScrapeWebsiteTool(), GithubTrendingTool()],
             
         )
+
 
     @agent
     def youtube_research_scout(self) -> Agent:
@@ -62,8 +63,8 @@ class MyagentNewsApi():
     def generate_final_summary(self) -> Task:
         return Task(
             config=self.tasks_config['generate_final_summary'], # type: ignore[index]
-           output_pydantic=ResearchDigestOutput,
-           #output_file="report.json"
+            output_pydantic=ResearchDigestOutput,
+            output_file="report.json"
         )
 
     @crew
