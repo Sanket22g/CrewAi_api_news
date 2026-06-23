@@ -1,4 +1,5 @@
-from crewai import Agent, Crew, Process, Task
+import os
+from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 from myagent_news_api.tools.custom_tool import YouTubeSearchTool, GithubTrendingTool
@@ -15,6 +16,23 @@ class MyagentNewsApi():
     agents: list[BaseAgent]
     tasks: list[Task]
 
+    _llm: LLM | None = None
+
+    @property
+    def llm(self) -> LLM:
+        if self._llm is None:
+            self._llm = LLM(
+                model=os.getenv("GEMINI_MODEL_PRIMARY", os.getenv("MODEL")),
+                api_key=os.getenv("GEMINI_API_KEY_PRIMARY", os.getenv("GEMINI_API_KEY")),
+                fallbacks=[
+                    {
+                        "model": os.getenv("GEMINI_MODEL_FALLBACK"),
+                        "api_key": os.getenv("GEMINI_API_KEY_FALLBACK")
+                    }
+                ]
+            )
+        return self._llm
+
     # Learn more about YAML configuration files here:
     # Agents: https://docs.crewai.com/concepts/agents#yaml-configuration-recommended
     # Tasks: https://docs.crewai.com/concepts/tasks#yaml-configuration-recommended
@@ -27,7 +45,7 @@ class MyagentNewsApi():
             config=self.agents_config['news_scout'], # type: ignore[index]
             verbose=True,
             tools=[SerperDevTool(), ScrapeWebsiteTool(), GithubTrendingTool()],
-            
+            llm=self.llm,
         )
 
 
@@ -36,13 +54,15 @@ class MyagentNewsApi():
         return Agent(
             config=self.agents_config['youtube_research_scout'], # type: ignore[index]
             verbose=True,
-            tools=[YouTubeSearchTool()]
+            tools=[YouTubeSearchTool()],
+            llm=self.llm,
         )
     @agent
     def summary_analyst(self) -> Agent:
         return Agent(
             config=self.agents_config['summary_analyst'], # type: ignore[index]
-            verbose=True
+            verbose=True,
+            llm=self.llm,
         )
     # To learn more about structured task outputs,
     # task dependencies, and task callbacks, check out the documentation:
