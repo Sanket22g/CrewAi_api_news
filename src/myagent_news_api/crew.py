@@ -84,7 +84,7 @@ class MyagentNewsApi():
         return Task(
             config=self.tasks_config['generate_final_summary'], # type: ignore[index]
             output_pydantic=ResearchDigestOutput,
-            output_file="report.json"
+            #output_file="report.json"
         )
 
     @crew
@@ -98,6 +98,6 @@ class MyagentNewsApi():
             tasks=self.tasks, # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            max_rpm=15
+            max_rpm=10
             # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )
