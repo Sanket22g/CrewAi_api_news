@@ -2,62 +2,56 @@
 
 fetch_ai_news:
   description: >
-    Today is {date}. Only include news articles published after {two_days_ago}. If there are fewer than 7 news articles published in the last 48 hours, fall back to the last 7 days to ensure you get exactly 7 news stories.
+    Today is {date}. Only include articles published after {two_days_ago}.
 
-    Step 1: Use SerperDevTool to run exactly TWO search queries back-to-back to find the best recent news:
-      Query A: "latest AI model releases and breakthroughs"
-      Query B: "cutting-edge AI research papers and architectures"
-    Combine the search results from both queries, and extract the top 7 most relevant and valuable AI news stories. For each story, extract:
-      - "title"        : clean readable title
+    Use SerperDevTool to run two search:
+      Query1: "latest AI model architecture research {date}"
+      Query2: "latest AI research breakthrough OR AI research blog OR new AI method {date}"
+
+    And for more accurate result you can use other tools also for best result you have freedom to take best news form source so it is helpful for founders and researchers and engineers also 
+    sources should be like openai, deepmind.google, huggingface, techcrunch, venturebeat, theverge, wired, hackernews,antropic. and so on you have fexbility to find from other sources so not just see this side only see other also and give most revolutionary and impactful news related to AI agents and analyze the news properly and give proper news related to AI agents not just search AI agents and give any news. try to find trending news on internet and 
+    From that TWO search result pick the top 7 most relevant AI stories.
+    also see blog and new methods but listen avoid marketing we need research and what problem they solve this type of nesw 
+    DO NOT run multiple searches — two search only to save API quota.
+
+    Use GithubTrendingTool to fetch today's top trending repository. and add it to in that 8 topics so 7 + one gitrepo 8 
+    For each story extract:
+      - "title"        : clean readable title (max 12 words)
       - "source"       : publication name
-      - "publish_date" : YYYY-MM-DD
-      - "summary"      : what is new, why it matters, and all related key details in 3 plain-English sentences
+      - "publish_date" : YYYY-MM-DD (skip if older than {two_days_ago})
+      - "summary"      :  what is new and why it matters and all related key details in  plain-English sentences like mini blog post
       - "url"          : direct article link
       - "category"     : model_release | research_paper | framework | product_launch | regulation
 
+      
+    Output: raw JSON array of 8 objects. No markdown, no code fences.
 
-    Step 2: Use GithubTrendingTool to fetch today's top trending GitHub repository.
-    Format the repository into the exact same JSON structure as a news story:
-      - "title"        : Repository Name (e.g., "[owner]/[name]")
-      - "source"       : "GitHub"
-      - "publish_date" : "{date}"
-      - "summary"      : A 3-sentence plain-English summary of what the repository does, what language it uses, and why it is trending today.
-      - "url"          : GitHub repository URL
-      - "category"     : "framework"
-
-    Step 3: Combine them into a single raw JSON array of exactly 8 objects (the first 7 are news stories, and the 8th is the GitHub repository). No markdown, no code fences.
+    
 
   expected_output: >
-    Raw JSON array of exactly 8 objects, all fields filled, no nulls.
+    Raw JSON array of 8 objects, all fields filled, no nulls.
     [{"title":"...","source":"...","publish_date":"...","summary":"...","url":"...","category":"..."}]
   agent: news_scout
 
 
 fetch_related_youtube_videos:
   description: >
-    You have exactly 8 topics (7 news stories and 1 GitHub repository) from fetch_ai_news.
-    Before searching, READ and ANALYZE each topic's title and summary carefully to understand the core technology involved.
+    You have 8 AI topics from fetch_ai_news.so analyse that topic and make qurey for youtube search to find videos related to that topic. 
 
     IMPORTANT — DO THIS IN ONE SINGLE PASS:
-    Run exactly 8 YouTube searches total (one per topic) back-to-back without stopping to think between searches. Do NOT make extra searches.
-    Do NOT re-search the same topic twice.
+    Run exactly 8 YouTube searches total (one per topic) back-to-back without
+    stopping to think between searches. Do NOT make extra searches.
+    Do NOT re-search the same topic twice.make sure you find proper videos of topic like Ai gents then analyze topic properly and givw proper video related to Ai agents not just search Ai agents and give any video. Analyze topic properly and give proper video related to topic.
 
     For each topic:
-      1. Analyze the topic summary from fetch_ai_news to identify the core technology.
-      2. Search for the BEST and MOST RELEVANT video for that topic — this can be
-         any format: tutorial, explainer, demo, research breakdown, hands-on guide,
-         paper walkthrough, or interview. Pick whatever best helps the reader
-         understand or use the technology.
-      3. PREFER tutorials if a good one exists — but never force it.
-         A great explainer or demo beats a weak tutorial every time.
-      4. If the topic is too new and results seem unrelated, search the core
-         technology instead (e.g. "RAG tutorial", "mixture of experts explained").
-      5. PRIORITY: Always prefer videos that highlight innovation — new ideas,
-         breakthroughs, novel approaches, or cutting-edge techniques.
-      6. Video age does not matter — relevance and quality come first.
+      1. Search YouTube using the topic. first analyse that topic and make search query for youtube.
+      2. Take the first 2 URLs returned
+      3. If the topic is too new and results seem unrelated, instead search
+         the core technology (e.g. "RAG explained", "mixture of experts explained")
 
-    For each video fill ALL fields — if title/channel/date are unknown, write your best inference from the URL and topic context. Never leave null.
-
+    For each video fill ALL fields — if title/channel/date are unknown,
+    write your best inference from the URL and topic context. Never leave null.
+    you MUST return 2 videos per topic. and old videos are fine as long as they are relevant and high-quality explainers of the core technology.
     Fields per video:
       - "title"        : video title (infer from topic if unknown)
       - "url"          : YouTube URL exactly as returned by tool
@@ -65,7 +59,8 @@ fetch_related_youtube_videos:
       - "publish_date" : YYYY-MM-DD or "unknown"
       - "description"  : 1 sentence about what the video covers
 
-    Output: raw JSON object. Key = topic title. Value = array of 2 video objects. No markdown, no code fences.
+    Output: raw JSON object. Key = topic title. Value = array of 2 video objects.
+    No markdown, no code fences.
 
   expected_output: >
     Raw JSON object keyed by topic title, 2 videos each, no nulls.
@@ -89,7 +84,7 @@ generate_final_summary:
       - "source"        : publication name
       - "publish_date"  : article date
       - "article_url"   : original link
-      - "plain_summary" : what is new and why it matters and all related key details in 3 plain-English sentences like mini blog post
+      - "plain_summary" :  what is new and why it matters and all related key details in 3 plain-English sentences like mini blog post
       - "key_takeaways" : array of 3 short strings
       - "related_links" : [{"label":"Original Article","url":"..."}]
       - "youtube_videos": 2 video objects from youtube_research_scout
@@ -108,4 +103,4 @@ generate_final_summary:
   agent: summary_analyst
   context:
     - fetch_ai_news
-    - fetch_related_youtube_videos
+    - fetch_related_youtube_videos

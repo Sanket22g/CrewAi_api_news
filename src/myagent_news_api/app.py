@@ -20,7 +20,7 @@ async def run_crew():
 
     """
     inputs = {
-        "topic": "LLM, Agentic AI, AI Updates, AI Tools, Machine Learning",
+        "topic": "LLM, Agentic AI, AI Updates, AI Tools, Machine Learning ,Ai resarch paper",
         "current_year": str(datetime.now().year),
         "date": datetime.now().strftime("%Y-%m-%d"),
         "two_days_ago": (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d")
