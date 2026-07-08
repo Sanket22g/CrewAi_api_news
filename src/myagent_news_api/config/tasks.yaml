@@ -5,14 +5,16 @@ fetch_ai_news:
     Today is {date}. Only include articles published after {two_days_ago}.
 
     Use SerperDevTool to run two search:
-      Query1: "latest AI model architecture research {date}"
-      Query2: "latest AI research breakthrough OR AI research blog OR new AI method {date}"
+      with the date {date}
+      make good qurey 
 
     And for more accurate result you can use other tools also for best result you have freedom to take best news form source so it is helpful for founders and researchers and engineers also 
     sources should be like openai, deepmind.google, huggingface, techcrunch, venturebeat, theverge, wired, hackernews,antropic. and so on you have fexbility to find from other sources so not just see this side only see other also and give most revolutionary and impactful news related to AI agents and analyze the news properly and give proper news related to AI agents not just search AI agents and give any news. try to find trending news on internet and 
     From that TWO search result pick the top 7 most relevant AI stories.
     also see blog and new methods but listen avoid marketing we need research and what problem they solve this type of nesw 
     DO NOT run multiple searches — two search only to save API quota.
+
+    IMPORTANT : do not say like this THis Article Say give this  directly  what article say okay 
 
     Use GithubTrendingTool to fetch today's top trending repository. and add it to in that 8 topics so 7 + one gitrepo 8 
     For each story extract:
@@ -36,7 +38,7 @@ fetch_ai_news:
 
 fetch_related_youtube_videos:
   description: >
-    You have 8 AI topics from fetch_ai_news.so analyse that topic and make qurey for youtube search to find videos related to that topic. 
+    You have 8 AI topics from fetch_ai_news.so analyse that topic and make qurey for youtube search to find videos related to that topic.for example in ariticle there is information about mamba model so seach it and give video links but in more inforamtion seach so we get good result.
 
     IMPORTANT — DO THIS IN ONE SINGLE PASS:
     Run exactly 8 YouTube searches total (one per topic) back-to-back without
@@ -79,13 +81,13 @@ generate_final_summary:
     Set "date_range" to: "Last 48 hours from {two_days_ago} to {date}"
 
     For each of the 8 topics build:
-      - "topic_title"   : clean title
+      - "topic_title"   : clean title no comman or general  tile give detail so when user read that it understant instancly
       - "category"      : from news_scout
       - "source"        : publication name
       - "publish_date"  : article date
       - "article_url"   : original link
-      - "plain_summary" :  what is new and why it matters and all related key details in 3 plain-English sentences like mini blog post
-      - "key_takeaways" : array of 3 short strings
+      - "plain_summary" :  what is new and why it matters and all related key details in  plain-English sentences like mini blog post
+      - "key_takeaways" : array of 4 short strings
       - "related_links" : [{"label":"Original Article","url":"..."}]
       - "youtube_videos": 2 video objects from youtube_research_scout
 
