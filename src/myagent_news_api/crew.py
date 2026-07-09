@@ -21,16 +21,39 @@ class MyagentNewsApi():
     @property
     def llm(self) -> LLM:
         if self._llm is None:
-            self._llm = LLM(
-                model=os.getenv("GEMINI_MODEL_PRIMARY", os.getenv("MODEL")),
-                api_key=os.getenv("GEMINI_API_KEY_PRIMARY", os.getenv("GEMINI_API_KEY")),
-                fallbacks=[
-                    {
-                        "model": os.getenv("GEMINI_MODEL_FALLBACK"),
-                        "api_key": os.getenv("GEMINI_API_KEY_FALLBACK")
-                    }
-                ]
+            primary_model = os.getenv("GEMINI_MODEL_PRIMARY", os.getenv("MODEL"))
+            primary_key = os.getenv("GEMINI_API_KEY_PRIMARY", os.getenv("GEMINI_API_KEY"))
+            fallback_model = os.getenv("GEMINI_MODEL_FALLBACK")
+            fallback_key = os.getenv("GEMINI_API_KEY_FALLBACK")
+
+            # Initialize primary LLM
+            llm_inst = LLM(
+                model=primary_model,
+                api_key=primary_key,
             )
+
+            # Patch call method to guarantee fallback on any rate-limit or 503 error
+            original_call = llm_inst.call
+
+            def robust_call(*args, **kwargs):
+                try:
+                    return original_call(*args, **kwargs)
+                except Exception as e:
+                    error_str = str(e)
+                    # Catch 429 quota, 503 service unavailable, or capacity issues
+                    if any(err in error_str for err in ["429", "503", "RESOURCE_EXHAUSTED", "UNAVAILABLE"]):
+                        print(f"\n[Warning] Primary LLM failed: {error_str.splitlines()[0]}")
+                        if fallback_model and fallback_key:
+                            print(f"Retrying with fallback: {fallback_model} using backup key...")
+                            fallback_llm = LLM(
+                                model=fallback_model,
+                                api_key=fallback_key,
+                            )
+                            return fallback_llm.call(*args, **kwargs)
+                    raise e
+
+            llm_inst.call = robust_call
+            self._llm = llm_inst
         return self._llm
 
     # Learn more about YAML configuration files here:
@@ -77,12 +100,13 @@ class MyagentNewsApi():
     def fetch_related_youtube_videos(self) -> Task:
         return Task(
             config=self.tasks_config['fetch_related_youtube_videos'], # type: ignore[index]
-            depends_on=[self.fetch_ai_news] # This means this task will only run after fetch_ai_news is completed
+            context=[self.fetch_ai_news()]
         )
     @task
     def generate_final_summary(self) -> Task:
         return Task(
             config=self.tasks_config['generate_final_summary'], # type: ignore[index]
+            context=[self.fetch_ai_news(), self.fetch_related_youtube_videos()],
             output_pydantic=ResearchDigestOutput,
             #output_file="report.json"
         )
@@ -98,6 +122,6 @@ class MyagentNewsApi():
             tasks=self.tasks, # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            max_rpm=10
+            max_rpm=5
             # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )
