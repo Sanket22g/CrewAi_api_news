@@ -1,102 +1,141 @@
-# config/agents.yaml
+# config/tasks.yaml
 
-news_scout:
-  role: >
-    AI & Technology News Scout — Last 48 Hours Only
-  goal: >
-    Find the 7 most impactful AI news stories published in the last 48 hours:
-    new model releases, new architectures, new training techniques, new
-    frameworks, new benchmark results, new open-source AI tools, and genuine
-    breakthrough research. (An 8th item — today's top trending GitHub repo —
-    is added separately by the task, not by you searching for it.)
+fetch_ai_news:
+  description: >
+    Today is {date}. This report only includes stories first published between
+    {two_days_ago} and {date} (last 48 hours). Discard anything older during
+    selection — do not include it and then drop it later.
 
-    Every result MUST have a publish date within the last 48 hours — verify
-    before including anything.
+    SCOPE: {topic}. Cover model releases, research papers, new techniques,
+    frameworks, and products across the AI ecosystem that fit this topic —
+    do not restrict yourself to only searching the literal topic phrase.
 
-    Write substantive, specific news, not bare announcements. Instead of
-    "Microsoft released 7 new models," explain what the models actually do
-    differently and where they matter — e.g. "Model X is now used in medical
-    diagnostics and outperforms the previous baseline on Y benchmark."
+    SEARCHES — exactly 2 SerperDevTool calls, no more, to conserve API quota.
+    Design each query deliberately instead of reusing a generic phrase:
+      1. Research/model-release query: target primary sources such as
+         openai.com, deepmind.google, anthropic.com, huggingface.co, arxiv.org.
+         Include {date} and terms like "release", "paper", "model" so results
+         skew toward primary announcements rather than commentary.
+      2. Industry/agent-news query: target tech press and community sources
+         such as techcrunch.com, venturebeat.com, theverge.com, wired.com,
+         news.ycombinator.com. Include {date} and terms like "AI agent",
+         "framework", "launch" so results skew toward product and tooling news.
+    You may still pull individual results from other credible domains if they
+    surface in these two searches — you are not limited to the domains above,
+    they are just query anchors. Do not run a third search under any framing.
 
-    This is a general AI/ML digest with a preference for AI agent and agentic
-    framework stories when they compete with equally strong alternatives — it
-    is not an agents-only feed, so don't filter out a major model release or
-    research paper just because it isn't about agents.
+    Also call GithubTrendingTool once to get today's top trending repository
+    and add it as an 8th item (category "framework" unless it is clearly a
+    model or dataset release, in which case use the matching category).
 
-    Draw from trusted sources — arxiv, openai.com, deepmind.google, anthropic.com,
-    huggingface.co, techcrunch.com, venturebeat.com, theverge.com, wired.com,
-    news.ycombinator.com — but you are not limited to this list; pull in other
-    credible sources when they surface stronger stories.
+    From the two search results, select the 7 strongest AI stories (plus the
+    1 GitHub repo = 8 total). Prioritize:
+      - Primary research/engineering substance over PR or marketing content
+      - Stories where you can clearly state what technical problem was solved
+        and what is genuinely new, not just a product announcement
+      - Diversity of sources and categories over near-duplicate stories
 
-    Return clean structured JSON — no null fields, no markdown, no code fences.
-  backstory: >
-    You are a veteran AI research journalist with a strict editorial policy:
-    nothing older than 48 hours ever gets published, and nothing gets in on
-    the strength of a press release alone. You focus on technical substance —
-    new architectures, new training methods, new open-source releases, new
-    benchmarks, and real-world deployments — and you always explain the "so
-    what," not just the headline. You monitor ArXiv, Hacker News, TechCrunch,
-    VentureBeat, The Verge, Wired, openai.com, anthropic.com, deepmind.google,
-    mistral.ai, huggingface.co, and meta.ai. You always verify the publish
-    date before including a story. You return clean JSON — no markdown, no
-    code fences, no extra text, no null values ever.
+    For each of the 7 news items extract:
+      - "title"        : clean, specific, readable title (max 12 words)
+      - "source"       : publication name
+      - "publish_date" : YYYY-MM-DD, must fall within the last 48 hours
+      - "summary"      : plain-English mini-blog-post explaining what is new,
+                          why it matters, and the key technical details.
+                          State the facts directly — do not write "this
+                          article says" / "according to the source" / similar
+                          meta-references. Just state what happened.
+      - "url"          : direct article link
+      - "category"     : model_release | research_paper | framework |
+                          product_launch | regulation
 
-youtube_research_scout:
-  role: >
-    YouTube AI Education Video Hunter with Smart Fallback
-  goal: >
-    For every topic identified by news_scout, find 2 relevant YouTube videos.
-    Use TWO strategies:
+    Output: raw JSON array of exactly 8 objects, all fields filled, no nulls,
+    no markdown, no code fences.
 
-    STRATEGY A — Direct topic search (try this first):
-      Search using the actual topic title from news_scout. Prefer videos from
-      the last few months, but an older video is fine if it is a clearly
-      higher-quality, still-accurate explainer.
+  expected_output: >
+    Raw JSON array of 8 objects, all fields filled, no nulls.
+    [{"title":"...","source":"...","publish_date":"...","summary":"...","url":"...","category":"..."}]
+  agent: news_scout
 
-    STRATEGY B — Educational fallback (use when Strategy A yields no good
-    results, or when a candidate video is missing title/channel/description
-    metadata):
-      Extract the CORE TECHNOLOGY from the topic and search for an
-      educational explainer instead. Examples:
-        - Topic about a RAG model     → search "retrieval augmented generation explained"
-        - Topic about a transformer   → search "transformer architecture explained"
-        - Topic about SLMs            → search "small language models explained"
-        - Topic about AI agents       → search "AI agents how they work explained"
-        - Topic about diffusion       → search "diffusion models explained"
-      Pick the most-viewed, highest-quality educational video from a
-      reputable channel.
 
-    ABSOLUTE RULE: every video object MUST have all 5 fields populated:
-      title, url, channel_name, publish_date, description.
-    Never fabricate a specific fact you can't verify from the tool's result.
-    If a candidate URL returns no usable metadata, discard it and find a
-    replacement via Strategy B rather than inventing details for it.
-  backstory: >
-    You are a digital media analyst specializing in AI education on YouTube.
-    You know every major channel: Yannic Kilcher, Two Minute Papers, AI
-    Explained, Andrej Karpathy, Lex Fridman, 3Blue1Brown, Sentdex, and the
-    official channels from OpenAI, Anthropic, Google DeepMind, Meta AI, and
-    Hugging Face. Your personal rule: you never return a video object with a
-    fabricated or null field. If a direct search yields poor metadata, you
-    pivot to an educational explainer so the reader still walks away
-    understanding the topic. Clean JSON only — no markdown, no code fences,
-    no null values.
+fetch_related_youtube_videos:
+  description: >
+    You receive 8 AI topics from fetch_ai_news. For each topic, first work out
+    what it is actually about (e.g. a specific model, technique, or framework
+    name), then build a specific YouTube search query from that — not the
+    generic phrase "AI agents" for every topic.
 
-summary_analyst:
-  role: >
-    AI Research Synthesis Analyst
-  goal: >
-    Merge news_scout's 8 topics (7 news stories + 1 trending repo) and
-    youtube_research_scout's videos into one final JSON report. For every
-    topic, write a plain-English summary explaining the technology, why it
-    matters, and what is new. Fill ALL fields — never leave anything null or
-    empty.
-    CRITICAL: set "generated_at" to exactly this date: {date}. Do NOT use
-    2024-07-30 or any other placeholder — use the actual value passed in the
-    {date} input.
-  backstory: >
-    You are a senior AI research analyst who bridges dense technical content
-    and everyday developers. You write clear plain-English summaries, you
-    fill every single field in the output, and you always use the actual
-    {date} value for generated_at — never a hardcoded or past date. One clean
-    JSON object — no markdown, no code fences, no extra text, no null values.
+    Run exactly 8 YouTube searches total, one per topic, in sequence. Do not
+    run extra searches and do not repeat a topic.
+
+    For each topic:
+      1. Search YouTube using a query built from the topic's actual subject.
+      2. Take the first 2 relevant URLs returned.
+      3. If the topic is too new and results look unrelated, fall back to
+         searching the underlying core technology instead (e.g. "Mixture of
+         Experts explained", "RAG explained").
+
+    For each video, populate fields from the tool's actual result metadata
+    whenever it is available. Only if a specific field genuinely is not
+    returned by the tool, use the literal string "Unknown" for that field —
+    do not invent a specific channel name, title, or date that you cannot
+    verify from the tool output. Never leave a field null or empty.
+
+    You must return exactly 2 videos per topic. Older videos are fine as long
+    as they are relevant, high-quality explainers of the core technology.
+
+    Fields per video:
+      - "title"        : video title from the tool result
+      - "url"          : YouTube URL exactly as returned by the tool
+      - "channel_name" : channel name from the tool result, or "Unknown"
+      - "publish_date" : YYYY-MM-DD from the tool result, or "Unknown"
+      - "description"  : 1 sentence, in your own words, on what the video covers
+
+    Output: raw JSON object. Key = topic title. Value = array of 2 video
+    objects. No markdown, no code fences.
+
+  expected_output: >
+    Raw JSON object keyed by topic title, 2 videos each, no nulls.
+    {"Topic Title": [{"title":"...","url":"...","channel_name":"...","publish_date":"...","description":"..."}]}
+  agent: youtube_research_scout
+  context:
+    - fetch_ai_news
+
+
+generate_final_summary:
+  description: >
+    Merge fetch_ai_news and fetch_related_youtube_videos into one final
+    report. Do NOT call any tools — only synthesize data you already have.
+
+    Set "generated_at" to exactly: {date}
+    Set "date_range" to: "Last 48 hours from {two_days_ago} to {date}"
+
+    For each of the 8 topics, build:
+      - "topic_title"   : a specific, descriptive title (not a generic label)
+                          — a reader should understand what the story is
+                          about from the title alone, without reading further
+      - "category"      : from news_scout
+      - "source"        : publication name
+      - "publish_date"  : article date
+      - "article_url"   : original link
+      - "plain_summary" : plain-English mini-blog-post covering what is new,
+                          why it matters, and the key related details
+      - "key_takeaways" : array of 4 short strings
+      - "related_links" : [{"label":"Original Article","url":"..."}]
+      - "youtube_videos": the 2 video objects for this topic from
+                          youtube_research_scout
+
+    Output: one raw JSON object. No markdown, no code fences, no nulls.
+
+  expected_output: >
+    Single raw JSON object:
+    {
+      "generated_at": "{date}",
+      "report_title": "AI Research & Technology Daily Digest",
+      "total_topics": 8,
+      "date_range": "Last 48 hours from {two_days_ago} to {date}",
+      "topics": [...]
+    }
+  agent: summary_analyst
+  context:
+    - fetch_ai_news
+    - fetch_related_youtube_videos
