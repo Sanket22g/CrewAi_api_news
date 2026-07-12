@@ -38,7 +38,7 @@ fetch_ai_news:
 
 fetch_related_youtube_videos:
   description: >
-    You have 8 AI topics from fetch_ai_news.so analyse that topic and make qurey for youtube search to find videos related to that topic.for example in ariticle there is information about mamba model so seach it and give video links but in more inforamtion seach so we get good result.
+    You have 8 AI topics from fetch_ai_news.so analyse that topic and make qurey for youtube search to find videos exactly and related to that topic.for example in ariticle there is information about mamba model so seach it and give video links but in more inforamtion seach so we get good result.
 
     IMPORTANT — DO THIS IN ONE SINGLE PASS:
     Run exactly 8 YouTube searches total (one per topic) back-to-back without
