@@ -2,79 +2,33 @@
 
 fetch_ai_news:
   description: >
-    Today is {date}. Only include stories published on {two_days_ago} or {date}.
-    Reject anything older — check the publish date before selecting any story.
+    Today is {date}. Only include articles published after {two_days_ago}.
 
-    SCOPE: {topic}
+    Use SerperDevTool to run two search:
+      with the date {date}
+      make good qurey 
 
-    HARD DIVERSITY RULE — the 7 news stories must come from AT LEAST 4 different
-    websites. No single website may contribute more than 2 stories. If your searches
-    return 5 results from the same site, take the top 2 from that site and find
-    the rest elsewhere. This rule exists so readers get a genuine cross-section
-    of the AI world, not a dump from one conference page or one aggregator.
+    And for more accurate result you can use other tools also for best result you have freedom to take best news form source so it is helpful for founders and researchers and engineers also 
+    sources should be like openai, deepmind.google, huggingface, techcrunch, venturebeat, theverge, wired, hackernews,antropic. and so on you have fexbility to find from other sources so not just see this side only see other also and give most revolutionary and impactful news related to AI agents and analyze the news properly and give proper news related to AI agents not just search AI agents and give any news. try to find trending news on internet and 
+    From that TWO search result pick the top 7 most relevant AI stories.
+    also see blog and new methods but listen avoid marketing we need research and what problem they solve this type of nesw 
+    DO NOT run multiple searches — two search only to save API quota.
 
-    SOURCE PRIORITY ORDER — work through this list top-to-bottom when deciding
-    which results to prefer:
-      Tier 1 (primary, highest trust): openai.com, anthropic.com,
-        deepmind.google, mistral.ai, meta.ai, huggingface.co, arxiv.org
-      Tier 2 (strong industry press): techcrunch.com, venturebeat.com,
-        theverge.com, wired.com, technologyreview.com
-      Tier 3 (community + aggregators): news.ycombinator.com, reddit.com/r/MachineLearning
-      Other credible sources are also fine — these tiers are priority guidance,
-      not a whitelist.
+    IMPORTANT : do not say like this THis Article Say give this  directly  what article say okay 
 
-    SEARCHES — run exactly 3 SerperDevTool calls. Use Serper's date filter
-    syntax so results are genuinely recent. Structure the queries like this:
+    Use GithubTrendingTool to fetch today's top trending repository. and add it to in that 8 topics so 7 + one gitrepo 8 
+    For each story extract:
+      - "title"        : clean readable title (max 12 words)
+      - "source"       : publication name
+      - "publish_date" : YYYY-MM-DD (skip if older than {two_days_ago})
+      - "summary"      :  what is new and why it matters and all related key details in  plain-English sentences like mini blog post
+      - "url"          : direct article link
+      - "category"     : model_release | research_paper | framework | product_launch | regulation
 
-      Search 1 — Model & research releases (Tier 1 sources):
-        Query: {topic} new model OR paper OR release after:{two_days_ago}
-        Goal: catch primary announcements from labs and arxiv
+      
+    Output: raw JSON array of 8 objects. No markdown, no code fences.
 
-      Search 2 — Products, agents & frameworks (press sources):
-        Query: {topic} AI agent OR framework OR tool OR launch after:{two_days_ago}
-        Goal: catch product launches, new frameworks, and tooling news
-
-      Search 3 — Trending & community picks:
-        Query: {topic} site:news.ycombinator.com OR site:venturebeat.com
-               OR site:technologyreview.com after:{two_days_ago}
-        Goal: catch community-vetted stories and long-tail coverage
-
-    After the 3 searches, use ScrapeWebsiteTool to open the full page of any
-    candidate article whose snippet is too short to write a proper summary from.
-    Do NOT write summaries based only on the search snippet — the summary must
-    reflect the actual article content.
-
-    Also call GithubTrendingTool once to fetch today's top trending repository
-    and add it as the 8th item. Set its category to "framework" unless it is
-    clearly a model (use "model_release") or dataset (use "research_paper").
-
-    SELECTION CRITERIA for the 7 news stories:
-      - Must satisfy the diversity rule above (≥4 different domains, ≤2 per domain)
-      - Prefer stories with real technical substance: what problem does it solve,
-        what is measurably new, what are the numbers
-      - Reject pure marketing, funding announcements with no technical detail,
-        and listicles ("top 10 AI tools")
-      - Prefer variety across categories — try to include at least one
-        model_release, one research_paper, and one product_launch or framework
-
-    For each of the 7 news stories output these fields:
-      - "title"        : specific, descriptive title max 12 words — reader
-                          should know exactly what happened from the title alone
-      - "source"       : publication name (e.g. "OpenAI Blog", "TechCrunch",
-                          "arXiv", "Hugging Face Blog")
-      - "publish_date" : YYYY-MM-DD — must be {two_days_ago} or {date}
-      - "summary"      : 4-6 sentences in plain English. Cover: what it is,
-                          what problem it solves, what is technically new,
-                          why it matters for founders/researchers/engineers.
-                          Write the facts directly — never say "the article
-                          says" or "according to the source." Just state what
-                          happened and why it matters.
-      - "url"          : direct article URL (not a search result page)
-      - "category"     : model_release | research_paper | framework |
-                          product_launch | regulation
-
-    Output: raw JSON array of exactly 8 objects (7 news + 1 GitHub repo),
-    all fields filled, no nulls, no markdown, no code fences.
+    
 
   expected_output: >
     Raw JSON array of 8 objects, all fields filled, no nulls.
@@ -84,43 +38,31 @@ fetch_ai_news:
 
 fetch_related_youtube_videos:
   description: >
-    You receive 8 AI topics from fetch_ai_news. For each topic, analyse what
-    the story is actually about — the specific model name, technique, or
-    framework — then build a targeted YouTube search query from that substance,
-    not from the generic topic phrase.
+    You have 8 AI topics from fetch_ai_news.so analyse that topic and make qurey for youtube search to find videos related to that topic.for example in ariticle there is information about mamba model so seach it and give video links but in more inforamtion seach so we get good result.
 
-    Run exactly 8 YouTube searches total, one per topic, in order. No repeats,
-    no extra searches.
+    IMPORTANT — DO THIS IN ONE SINGLE PASS:
+    Run exactly 8 YouTube searches total (one per topic) back-to-back without
+    stopping to think between searches. Do NOT make extra searches.
+    Do NOT re-search the same topic twice.make sure you find proper videos of topic like Ai gents then analyze topic properly and givw proper video related to Ai agents not just search Ai agents and give any video. Analyze topic properly and give proper video related to topic.
 
     For each topic:
-      1. Identify the core technology or concept (e.g. "Mixture of Experts
-         routing", "KV cache quantization", "diffusion language models").
-      2. Search YouTube for that specific concept.
-      3. Take the first 2 results that are clearly relevant.
-      4. If results look unrelated to the actual topic (the story is too new),
-         fall back to searching the underlying concept with "explained":
-           e.g. "mixture of experts explained", "KV cache explained",
-                "diffusion language model explained", "AI agents explained"
+      1. Search YouTube using the topic. first analyse that topic and make search query for youtube.
+      2. Take the first 2 URLs returned
+      3. If the topic is too new and results seem unrelated, instead search
+         the core technology (e.g. "RAG explained", "mixture of experts explained")
 
-    Populate every field from the tool's actual returned metadata.
-    If a field is genuinely missing from the tool result, write "Unknown" —
-    never invent a title, channel name, or date you cannot verify.
-    If a video URL has no usable metadata at all, discard it and search again
-    using the fallback strategy above.
-
-    You must return exactly 2 videos per topic, 16 videos total.
-    Older videos are fine if they are the best explainer for that technology.
-
+    For each video fill ALL fields — if title/channel/date are unknown,
+    write your best inference from the URL and topic context. Never leave null.
+    you MUST return 2 videos per topic. and old videos are fine as long as they are relevant and high-quality explainers of the core technology.
     Fields per video:
-      - "title"        : from tool result
-      - "url"          : YouTube URL exactly as returned by the tool
-      - "channel_name" : from tool result, or "Unknown"
-      - "publish_date" : YYYY-MM-DD from tool result, or "Unknown"
-      - "description"  : your own 1-sentence summary of what the video covers
+      - "title"        : video title (infer from topic if unknown)
+      - "url"          : YouTube URL exactly as returned by tool
+      - "channel_name" : channel name (infer if unknown, e.g. "AI Research Channel")
+      - "publish_date" : YYYY-MM-DD or "unknown"
+      - "description"  : 1 sentence about what the video covers
 
-    Output: raw JSON object. Key = topic title from fetch_ai_news.
-    Value = array of exactly 2 video objects.
-    No markdown, no code fences, no nulls.
+    Output: raw JSON object. Key = topic title. Value = array of 2 video objects.
+    No markdown, no code fences.
 
   expected_output: >
     Raw JSON object keyed by topic title, 2 videos each, no nulls.
@@ -133,32 +75,23 @@ fetch_related_youtube_videos:
 generate_final_summary:
   description: >
     Merge fetch_ai_news and fetch_related_youtube_videos into one final report.
-    Do NOT call any tools — only synthesise the data already returned by the
-    two previous tasks.
+    Do NOT call any tools — just synthesize the data you already have.
 
     Set "generated_at" to exactly: {date}
-    Set "date_range"  to exactly: "Last 48 hours from {two_days_ago} to {date}"
+    Set "date_range" to: "Last 48 hours from {two_days_ago} to {date}"
 
-    For each of the 8 topics build one object with these fields:
-      - "topic_title"   : specific and descriptive — reader understands the
-                          story instantly without reading further
-      - "category"      : as set by news_scout
+    For each of the 8 topics build:
+      - "topic_title"   : clean title no comman or general  tile give detail so when user read that it understant instancly
+      - "category"      : from news_scout
       - "source"        : publication name
       - "publish_date"  : article date
-      - "article_url"   : original article link
-      - "plain_summary" : 4-6 plain-English sentences — what is new, what
-                          problem it solves, why it matters, key technical
-                          detail. Write for a founder, researcher, or engineer
-                          who has 30 seconds to decide if they care.
-      - "key_takeaways" : array of exactly 4 short strings, each a standalone
-                          fact or insight a reader can act on or remember
-      - "related_links" : [{"label":"Original Article","url":"<article_url>"}]
-      - "youtube_videos": the 2 video objects from youtube_research_scout for
-                          this topic — copy them exactly, no changes
+      - "article_url"   : original link
+      - "plain_summary" :  what is new and why it matters and all related key details in  plain-English sentences like mini blog post
+      - "key_takeaways" : array of 4 short strings
+      - "related_links" : [{"label":"Original Article","url":"..."}]
+      - "youtube_videos": 2 video objects from youtube_research_scout
 
-    All 8 topics must be present. No field may be null or empty.
-
-    Output: one raw JSON object, no markdown, no code fences.
+    Output: one raw JSON object. No markdown, no code fences, no nulls.
 
   expected_output: >
     Single raw JSON object:
