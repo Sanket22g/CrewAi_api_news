@@ -14,7 +14,7 @@ fetch_ai_news:
     also see blog and new methods but listen avoid marketing we need research and what problem they solve this type of nesw 
     DO NOT run multiple searches — two search only to save API quota.
 
-    IMPORTANT : do not say like this THis Article Say give this  directly  what article say okay 
+    IMPORTANT : do not say like this THis Article Say give this  directly  what article say okay And take the news form diffrent article not same link 
 
     Use GithubTrendingTool to fetch today's top trending repository. and add it to in that 8 topics so 7 + one gitrepo 8 
     For each story extract:
@@ -22,7 +22,7 @@ fetch_ai_news:
       - "source"       : publication name
       - "publish_date" : YYYY-MM-DD (skip if older than {two_days_ago})
       - "summary"      :  what is new and why it matters and all related key details in  plain-English sentences like mini blog post
-      - "url"          : direct article link
+      - "url"          : direct article link please give same airticle link not modified  or any other article
       - "category"     : model_release | research_paper | framework | product_launch | regulation
 
       
@@ -85,7 +85,7 @@ generate_final_summary:
       - "category"      : from news_scout
       - "source"        : publication name
       - "publish_date"  : article date
-      - "article_url"   : original link
+      - "article_url"   : original link of that page where you fetch the news 
       - "plain_summary" :  what is new and why it matters and all related key details in  plain-English sentences like mini blog post
       - "key_takeaways" : array of 4 short strings
       - "related_links" : [{"label":"Original Article","url":"..."}]
